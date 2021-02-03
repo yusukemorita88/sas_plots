@@ -4,6 +4,7 @@
 %let yvar = HEIGHT;
 %let dsin = ADSL;
 %let filename = plot1; %*without extension;
+%let trtvar = TRT01A;
 
 /* Suppress procedure output */
 ods exclude all; 
@@ -60,7 +61,7 @@ ods graphics / imagename="&filename." imagefmt=png noborder;
 
 proc sgplot data=&dsin.;
     reg y = &yvar. x =  &xvar./ nomarkers/*clm cli*/;
-    scatter y = &yvar. x = &xvar./group=TRT01A;
+    scatter y = &yvar. x = &xvar./group = &trtvar.;
     inset 
         ("Observations"="&obs" 
         "Parameters"= "&parms"
