@@ -12,7 +12,7 @@ data bmt(drop=g label="Bone Marrow Transplant Patients");
 run;
 
 ods output SurvivalPlot=sp1 HomTests=pval1;
-proc lifetest data=bmt plots=survival(test atrisk(atrisktickonly outside maxlen=13) = 0 to 2500 by 500);
+proc lifetest data=bmt plots=survival(test cl atrisk(atrisktickonly outside maxlen=13) = 0 to 2500 by 500);
     time t*status(0);
     strata group / order=internal;
 run; 
@@ -24,15 +24,22 @@ data _null_;
 run;
 
 ods select all;
+ods graphics  /reset=index noborder imagename="filename" imagefmt=png width=16 cm height=9 cm;
 title "Product-Limit Survival Estimates";
 title2 height=0.8 "With Number of Subjects at Risk";
 proc sgplot data=sp1;
-    step x=time y=survival / group=stratum name='s';
-    keylegend 's' / location=outside title="Group";
-    yaxis values=(.0 .2 .4 .6 .8 1);
-    inset "Log-Rank p = &LRPV." / position=top border;
-    xaxistable atrisk / x=tatrisk class=stratum colorgroup=stratum location=outside;
-    scatter x=time y=censored / markerattrs=(symbol=plus) name='c';
+    styleattrs
+      datacolors = (blue maroon green)
+      datacontrastcolors = (blue maroon green)
+      datalinepatterns = (1 1 1)
+    ;
+    step x=time y=survival / group=stratum name='km'; *kaplan-meier plot;
+    band x=time upper=sdf_ucl lower=sdf_lcl /group=stratum  modelname='km' transparency=.8;*CI band;
+    keylegend 'km' / location=outside title="Group";
+    scatter x=time y=censored / markerattrs=(symbol=plus) name='censor';
     scatter x=time y=censored / markerattrs=(symbol=plus) group=stratum;
-    keylegend 'c' / location=inside position=topright type=markersymbol;
+    keylegend 'censor' / location=inside position=topright type=markersymbol;
+    yaxis values=(0.0 0.2 0.4 0.6 0.8 1.0) labelattrs=(size=12) valueattrs=(size=12);
+    inset "Log-Rank p = &LRPV." / position=top border;
+    xaxistable atrisk / x=tatrisk class=stratum colorgroup=stratum location=outside  valueattrs=(size=10) labelattrs=(size=10);
 run;
