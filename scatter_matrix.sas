@@ -5,10 +5,10 @@ run;
 
 title "Scatterplot Matrix for Iris Data";
 proc sgscatter data=sashelp.iris;
-     plot 
+     plot /* (Y) * (X) */
         ( sepallength petallength sepalwidth petalwidth ) * 
         ( sepallength petallength sepalwidth petalwidth )
-     /reg=(nogroup) group=species ;
+     /loess=(nogroup) reg=(nogroup) group=species ;
 run;
 
 title "Scatterplot Matrix for Iris Data";
